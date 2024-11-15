@@ -95,7 +95,7 @@ res.json("delete")
       let id = req.params.id;
       let d;
     console.log(id)
-      let newListing =  await Listing.findByIdAndUpdate(id,{name,description,price,catagory,age,location,other}).then((data)=>{
+      let newListing =  await Listing.findByIdAndUpdate(id,{name,description,price,catagory,age,location,status:"update",other}).then((data)=>{
         
         // console.log("this is data"+data.image[0].id)
         console.log(data)

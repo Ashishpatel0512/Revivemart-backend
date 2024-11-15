@@ -335,7 +335,10 @@ app.get("/user/mybids",pass.authenticate("jwt",{session:false}),wrapAsync(async 
       console.log(users)
       user=users
     });
-  let bids = await biding.find({ "User": userid }).populate("Productid")
+  let bids = await biding.find({ "User": userid }).populate({
+    path: 'Productid',
+    populate: { path: 'User' }
+ }) .populate('User') 
   .then((bid) => {
     console.log(bid);
     
@@ -351,7 +354,10 @@ app.get("/user/mybids",pass.authenticate("jwt",{session:false}),wrapAsync(async 
 app.get("/showbids/:id",pass.authenticate("jwt",{session:false}),wrapAsync(async(req,res)=>{
   let {id}=req.params;
   let user=req.user;
-  let listing = await biding.find({"Productid":id }).populate("Productid").then((data)=>{
+  let listing = await biding.find({"Productid":id }).populate({
+    path: 'Productid',
+    populate: { path: 'User' }
+ }) .populate('User') .then((data)=>{
     console.log(data)
     // res.render("showbids.ejs",{data})
       res.json({data,user})
@@ -448,6 +454,23 @@ app.put("/block/:_id/",pass.authenticate("jwt",{session:false}),wrapAsync(async 
     console.log(data)
     // res.redirect("/userdata")
          res.json("user is block")
+
+  })
+
+}))
+app.put("/unblock/:_id/",pass.authenticate("jwt",{session:false}),wrapAsync(async (req, res) => {
+  let {_id} = req.params;
+  console.log(_id)
+  let product = await Users.findByIdAndUpdate(_id, { status: "Active" }).then((data) => {
+    // let bids = Listing.findOneAndUpdate({ "User": _id },{status:"block"}).then((bid) => {
+    //   console.log(bid);  
+    // })
+    let bids = Listing.updateMany({ "User": _id }, { $set: { status: 'pending'} }).then((bid) => {
+      console.log(bid);  
+    })
+    console.log(data)
+    // res.redirect("/userdata")
+         res.json("user is unblock")
 
   })
 
