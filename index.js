@@ -8,6 +8,8 @@ const app = express();
 const port = process.env.PORT||3000
 const mongoose = require("mongoose");
 const Users = require("./modules/user.js");
+const Otp = require("./modules/otp.js");
+
 const Listing = require("./modules/listings.js");
 const biding = require("./modules/biding.js");
 const Notify = require("./modules/notification.js");
@@ -31,6 +33,7 @@ const flash=require("connect-flash");
 const passport=require("./config/passport");
 const pass=require("passport");
 const { error } = require('console');
+const sendMail=require("./config/sendmail.js")
 
 
 const url=process.env.ATLASDB_URL;
@@ -104,6 +107,84 @@ const corsOptions = {
 
   app.use("/",listRoute)
 
+  app.post("/otp",(req,res)=>{
+
+    let {emailid}=req.body;
+    console.log(emailid)
+    async function generateOtp(email) {
+      const otp = Math.floor(100000 + Math.random() * 900000).toString(); // Generate a 6-digit OTP
+    
+      // Remove any existing OTP for the email
+      await Otp.deleteMany({ email });
+    
+      // Create a new OTP entry
+      await Otp.create({ email, otp });
+    
+      sendMail(otp,email)
+      console.log(`OTP for ${email}: ${otp}`);
+      res.json({success:true,email})
+    }    
+    generateOtp(emailid)
+
+  })
+
+  app.post("/verify",(req,res,next)=>{
+    try {
+      let {emailid,otp}=req.body;
+    console.log(otp)
+    console.log(emailid)
+
+    async function verifyOtp(email, inputOtp) {
+      const otpRecord = await Otp.findOne({ email, otp: inputOtp });
+    
+      if (otpRecord) {
+        console.log('OTP verified');
+        // Remove the OTP document after verification
+        await Otp.deleteOne({ _id: otpRecord._id });
+        return res.json({success:true,email});
+      }
+    else{
+      console.log('Invalid or expired OTP');
+      return res.json({success:false});
+    }
+    }
+    verifyOtp(emailid,otp);
+    } catch (error) {
+      next(error)
+    }
+    
+  })
+
+  // change password
+
+  app.post("/forgot/password",(req,res)=>{
+    let {emailid,password}=req.body;
+
+    if(!emailid ||!password){
+    return  res.json({
+        success:false,
+        message:"emailid && password is empty please fill now"
+      })
+    }
+    else{
+      const salt = bcrypt.genSaltSync(10); 
+      let update= Users.findOneAndUpdate({emailid},{password:bcrypt.hashSync(password, salt)},{new: true,
+        upsert: true }).then((data)=>{
+            console.log(data);
+            if(!data){
+              return  res.json({
+                success:false,
+                message:"emailid && password is false please try again"
+              })
+            }
+            else{
+            res.json({success:true,message:"password update successfully"})
+            }
+      })
+
+    }
+  })
+  //
 app.post("/resister",async (req, res) => {
 
  try {
