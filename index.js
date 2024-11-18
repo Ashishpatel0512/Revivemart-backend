@@ -185,6 +185,18 @@ const corsOptions = {
     }
   })
   //
+
+  // update user profile
+
+  app.post("/change/profile",pass.authenticate("jwt",{session:false}),(req,res)=>{
+    let id=req.user._id;
+    let {name,emailid}=req.body;
+    console.log(name,emailid);
+    let user=Users.findByIdAndUpdate(id,{name:name,emailid:emailid}).then((data)=>{
+      console.log(data)
+    });
+    res.json({success:true,message:"update profiles successfully"})
+  })
 app.post("/resister",async (req, res) => {
 
  try {
@@ -292,18 +304,30 @@ app.post("/resister",async (req, res) => {
 
 
 //home page
-app.get('/show',    pass.authenticate("jwt",{session:false}),
+app.get('/show', pass.authenticate("jwt",{session:false}),
 wrapAsync(async (req, res) => {
      console.log("catagory",req.query.catagory);
-
+    
+   let list;
+  let catagory=req.query.catagory;
+  let greater= parseInt(req.query.greater, 10);
+  let less=parseInt(req.query.less, 10);
+  console.log(greater);
+  console.log(less);
+   if(!isNaN(greater)&&!isNaN(less)){
+   list = await Listing.find({ status: "Approve",age: { $gt:greater, $lt:less }});
+    console.log("age",list)
+  }
   // console.log("this sesssion id....."+req.session.data)
-  let list;
-    let catagory=req.query.catagory;
-    if(catagory!="undefined"){
+   if(catagory!="undefined"){
      list = await Listing.find({ status: "Approve",catagory:catagory});
       console.log(list)
-    }
-    else{
+   }
+   if(catagory!="undefined"&&(!isNaN(greater)&&!isNaN(less))){
+    list = await Listing.find({ status: "Approve",catagory:catagory,age: { $gt:greater, $lt:less }});
+     console.log("age",list)
+   }
+    if(catagory=="undefined"&&isNaN(greater)){
       list = await Listing.find({ status: "Approve"});
       console.log(list)
     }

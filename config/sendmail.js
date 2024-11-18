@@ -5,8 +5,8 @@ const transporter = nodemailer.createTransport({
   host: "smtp.gmail.com",
   secure: true, 
   auth: {
-    user: process.env.MAIL_ID,
-    pass: process.env.MAIL_PASS,
+    user: "revivemart309@gmail.com",
+    pass: "xdzmcgvlqycfzhfd",
   },
 });
 
@@ -14,7 +14,7 @@ const transporter = nodemailer.createTransport({
 async function sendMail(otp,email) {
   // send mail with defined transport object
   const info = await transporter.sendMail({
-    from: process.env.MAIL_ID, // sender address
+    from: 'revivemart309@gmail.com', // sender address
     to: email, // list of receivers
     subject: "Hello ✔", // Subject line
     // text:"Revivemart otp:",otp // plain text body
