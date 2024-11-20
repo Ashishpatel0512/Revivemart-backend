@@ -342,18 +342,18 @@ wrapAsync(async (req, res) => {
       data=null
     }
   let ads;
-    if(req.session.item){
-      let adss=Ads.find({productname:req.session.item}).populate("Productid").then((ad)=>{
+    // if(req.session.item){
+      let adss=Ads.find().populate("Productid").then((ad)=>{
        console.log(ad)
        ads=ad;
        res.json( { list, data,ads })
       })
-   }
-   else{
-    req.session.item="null";
-    ads=[];
-    res.json( { list, data,ads })
-  }
+  //  }
+  //  else{
+    // req.session.item="null";
+    // ads=[];
+    // res.json( { list, data,ads })
+  // }
    }))
   
   //show page
@@ -581,14 +581,15 @@ app.put("/unblock/:_id/",pass.authenticate("jwt",{session:false}),wrapAsync(asyn
 
 }))
 
-app.post("/ads/:productid/:productname",pass.authenticate("jwt",{session:false}),wrapAsync((req,res)=>{
+app.get("/ads/:productid",pass.authenticate("jwt",{session:false}),wrapAsync((req,res)=>{
   let productid=req.params.productid;
-  let productname=req.params.productname;
   
- let newads = new Ads({productname:productname,Productid:productid})
+ let newads = new Ads({Productid:productid})
   newads.save()
   // res.redirect("/user/products")
-     res.json("ads add")
+     res.json({
+      success:true,
+     })
 
 }))
   app.all("*",(req,res,next)=>{

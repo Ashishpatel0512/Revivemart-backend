@@ -2,9 +2,7 @@ const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
 const adsSchema = new Schema({
-    productname: {
-      type:String,
-    },
+    
     // price: {
     //     type:Number,
     //   },
