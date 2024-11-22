@@ -14,8 +14,12 @@ const adsSchema = new Schema({
       Productid:{
         type:Schema.Types.ObjectId,
         ref:"Listing"
-      }
-     
+      },
+     status:{
+      type:String,
+  default:"Active"
+
+     }
 //  image: [{
 //         url:String,
 //         filename:String

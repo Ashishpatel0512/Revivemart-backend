@@ -107,10 +107,23 @@ const corsOptions = {
 
   app.use("/",listRoute)
 
-  app.post("/otp",(req,res)=>{
+  app.post("/otp",async(req,res)=>{
 
     let {emailid}=req.body;
     console.log(emailid)
+    if(!emailid){
+        return res.json( {
+            success:false, // Proceed to password change
+            message : "email is required!"
+          });
+    }
+    const user = await Users.findOne({emailid:emailid})
+    if(!user){
+        return res.json( {
+            success: false, // Proceed to password change
+            message : "emailid is not found!"
+          });  
+    }
     async function generateOtp(email) {
       const otp = Math.floor(100000 + Math.random() * 900000).toString(); // Generate a 6-digit OTP
     
@@ -145,7 +158,10 @@ const corsOptions = {
       }
     else{
       console.log('Invalid or expired OTP');
-      return res.json({success:false});
+      return res.json({
+        success:false,
+        message:'Invalid or expired OTP'
+      });
     }
     }
     verifyOtp(emailid,otp);
@@ -427,9 +443,12 @@ app.get("/user/products",pass.authenticate("jwt",{session:false}),wrapAsync(asyn
 
   let product = Listing.find({ "User": userid }).then((data) => {
     console.log(data)
-    // res.render("product.ejs", { userid, data })
-    res.json( { userid, data,user })
 
+    let adss=Ads.find().populate("Productid").then((ad)=>{
+      console.log("ad",ad)
+     
+    res.json( { userid, data,user, ads:ad })
+  })
   })
 }));
 
@@ -494,7 +513,10 @@ app.post('/upload',pass.authenticate("jwt",{session:false}),upload.single('file'
     newListing.image={url,filename}
   newListing.save()
 // res.redirect(`/user/general`)    
- res.json("image upload completed")    
+ res.json({
+  success:true,
+  message:"Image Upload Successfully"
+ })    
 
   }))
 //admin //
@@ -600,8 +622,12 @@ app.get("/ads/:productid",pass.authenticate("jwt",{session:false}),wrapAsync((re
       app.use((err,req,res,next)=>{
         let {statusCode=500,message="somethings went wrong"}=err;
         //react
+        console.log("msg",message)
           // res.status(statusCode).render("error.ejs",{message});
-          res.json({error:message})
+         return res.json({
+            success:false,
+            error:message
+          })
       // res.status(statusCode).json({message});
       })
       
