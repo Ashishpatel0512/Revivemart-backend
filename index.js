@@ -614,6 +614,41 @@ app.get("/ads/:productid",pass.authenticate("jwt",{session:false}),wrapAsync((re
      })
 
 }))
+//ads manage admin
+app.get("/ad",pass.authenticate("jwt",{session:false}),wrapAsync( async (req, res) => {
+  let user=req.user;
+  let product = await Ads.find().populate("Productid").then((data) => {
+    console.log(data)
+    // res.render("admin.ejs", {data})
+    res.json({data,user})
+
+  });
+
+}))
+
+app.put("ads/approve/:_id",pass.authenticate("jwt",{session:false}),wrapAsync(async (req, res) => {
+  let { _id } = req.params;
+  
+  console.log(_id)
+  let product = await Ads.findByIdAndUpdate(_id, { status: "Approve" }).then((data) => {
+    console.log(data)
+    // res.redirect(`/products`)
+         res.json("approve this item")
+
+  })
+
+}))
+app.put("ads/reject/:_id/",pass.authenticate("jwt",{session:false}), wrapAsync(async (req, res) => {
+  let { _id } = req.params;
+  console.log(_id)
+  let product = await Ads.findByIdAndUpdate(_id, { status: "Reject" }).then((data) => {
+    console.log(data)
+    // res.redirect(`/products`)
+    res.json("reject this item")
+  })
+
+}))
+
   app.all("*",(req,res,next)=>{
     next(new ExpressError(404,"somethig went wrong please try again"))
   })
