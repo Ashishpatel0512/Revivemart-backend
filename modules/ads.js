@@ -17,7 +17,7 @@ const adsSchema = new Schema({
       },
      status:{
       type:String,
-  default:"Active"
+  default:"pending"
 
      }
 //  image: [{
